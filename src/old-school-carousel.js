@@ -12,7 +12,7 @@ function Carousel (param) {
 		duration: 200
 	};
 	this.speed = 10;
-	this.speedLevels = [5, 10, 50, 100, 200, 500, 1000, 5000, 10000];
+	this.speedLevels = [2, 5, 10, 20, 50, 100, 200, 300, 500, 1000];
 
 	if (typeof param === 'string' && param.trim().length) this.container = document.querySelector(param.trim());
 	if (typeof param === 'object') this.container = param;
@@ -21,6 +21,7 @@ function Carousel (param) {
 		&& this.container.constructor.toString().indexOf('Element') === -1
 	) throw 'The first parameter should be a query selector or an HTML element';
 
+	this.width = this.container.getBoundingClientRect().width;
 	this.init();
 }
 
@@ -54,6 +55,7 @@ Carousel.prototype.init = function () {
 
 	// Convert NodeList to Array
 	Array.prototype.forEach.call(this.slideWrapper.querySelectorAll('.slide'), function (slide) {
+		slide.style.width = _this.width + 'px';
 		slides.push(slide);
 	});
 	this.slides = slides;
@@ -83,8 +85,8 @@ Carousel.prototype.mostDisplaySlide = function () {
 	var container = this.container.getBoundingClientRect(),
 		wrapper = this.slideWrapper.getBoundingClientRect(),
 		offset = (wrapper.left - container.left) / container.width;
-	console.log(offset, Math.floor(0.25 - offset));
-	return Math.floor(0.3 - offset);
+	// console.log(offset, 0.2 - Math.abs(offset), Math.floor(0.2 - offset));
+	return Math.floor(0.5 - offset);
 };
 
 Carousel.prototype.movemove = function (e) {
@@ -104,8 +106,19 @@ Carousel.prototype.movemove = function (e) {
 
 Carousel.prototype.snapPosition = function () {
 	var container = this.container.getBoundingClientRect(), target = this.mostDisplaySlide();
+	console.log(this.speed);
+
+	// Fast
+	if (Math.abs(this.speed) >= 20) {
+		if (this.speed > 0) {
+			target --;
+		} else {
+			target ++;
+		}
+	}
 	if (target < 0) target = 0;
 	if (target > this.slides.length - 1) target = this.slides.length - 1;
+
 	this.container.setAttribute('animating', '');
 	this.slideWrapper.style.transform = 'translateX(' + (target * container.width * -1) + 'px)';
 	this.slideWrapper.style.WebkitTransform = 'translateX(' + (target * container.width * -1) + 'px)';
