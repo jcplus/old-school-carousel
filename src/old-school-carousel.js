@@ -1,4 +1,4 @@
-function OldSchoolCarousel (param) {
+function Carousel (param) {
 	var _this = this;
 	if (typeof param === 'undefined') throw 'First parameter is required';
 
@@ -12,7 +12,7 @@ function OldSchoolCarousel (param) {
 		duration: 200
 	};
 	this.speed = 10;
-	this.speedLevels = [10, 50, 100, 200, 500, 1000, 5000, 10000];
+	this.speedLevels = [5, 10, 50, 100, 200, 500, 1000, 5000, 10000];
 
 	if (typeof param === 'string' && param.trim().length) this.container = document.querySelector(param.trim());
 	if (typeof param === 'object') this.container = param;
@@ -24,19 +24,18 @@ function OldSchoolCarousel (param) {
 	this.init();
 }
 
-OldSchoolCarousel.prototype.compensateSlides = function (i, position) {
+Carousel.prototype.compensateSlides = function (i, position) {
 	var clone = this.slides[i].cloneNode(true);
 	this.slideWrapper.insertAdjacentElement(position, clone);
 };
 
-OldSchoolCarousel.prototype.determineSpeed = function (offset) {
+Carousel.prototype.determineSpeed = function (offset) {
 	for (var i = 0; i < this.speedLevels.length; i ++) {
 		if (Math.abs(offset) > this.speedLevels[i]) this.speed = offset > 0 ? this.speedLevels[i] : -this.speedLevels[i];
 	}
-	console.log(this.speed);
 };
 
-OldSchoolCarousel.prototype.init = function () {
+Carousel.prototype.init = function () {
 	var _this = this, slides = [];
 	this.container.classList.add('carousel');
 	this.slideWrapper = this.container.querySelector('.slides');
@@ -66,6 +65,7 @@ OldSchoolCarousel.prototype.init = function () {
 		// this.compensateSlides(slides.length - 1, 'beforeend');
 
 		this.container.addEventListener('mousedown', function (e) {
+			_this.container.removeAttribute('animating');
 			_this.posX = e.clientX; // Mousedown position marked as anchor
 			_this.dragging = true; // In dragging mode
 			document.addEventListener('mousemove', mousemoveFunc);
@@ -79,14 +79,15 @@ OldSchoolCarousel.prototype.init = function () {
 	}
 };
 
-OldSchoolCarousel.prototype.mostDisplaySlide = function () {
+Carousel.prototype.mostDisplaySlide = function () {
 	var container = this.container.getBoundingClientRect(),
 		wrapper = this.slideWrapper.getBoundingClientRect(),
 		offset = (wrapper.left - container.left) / container.width;
-	return Math.floor(0.5 - offset);
+	console.log(offset, Math.floor(0.25 - offset));
+	return Math.floor(0.3 - offset);
 };
 
-OldSchoolCarousel.prototype.movemove = function (e) {
+Carousel.prototype.movemove = function (e) {
 	if (!this.dragging) return;
 	var transform = getComputedStyle(this.slideWrapper).getPropertyValue('transform'),
 		matrix = transform.replace(/[^0-9\-.,]/g, '').split(','),
@@ -101,10 +102,15 @@ OldSchoolCarousel.prototype.movemove = function (e) {
 	this.determineSpeed(offset);
 };
 
-OldSchoolCarousel.prototype.snapPosition = function () {
-	console.log('released on %s, speed is %s', this.mostDisplaySlide(), this.speed);
+Carousel.prototype.snapPosition = function () {
+	var container = this.container.getBoundingClientRect(), target = this.mostDisplaySlide();
+	if (target < 0) target = 0;
+	if (target > this.slides.length - 1) target = this.slides.length - 1;
+	this.container.setAttribute('animating', '');
+	this.slideWrapper.style.transform = 'translateX(' + (target * container.width * -1) + 'px)';
+	this.slideWrapper.style.WebkitTransform = 'translateX(' + (target * container.width * -1) + 'px)';
 };
 
 HTMLElement.prototype.carousel = function () {
-	new OldSchoolCarousel(this);
+	new Carousel(this);
 };
