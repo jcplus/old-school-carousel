@@ -11,8 +11,12 @@
 	padding: 0;
 }
 
-.carousel .slides .slide img {
+.carousel .slides .slide > img {
+	display: block;
+	height: auto;
+	margin: 0;
 	pointer-events: none; /* Prevent dragging */
+	width: 100%;
 }
 
 .carousel[animation="fadein"] .slides,
@@ -40,7 +44,7 @@
 }
 
 .carousel[animation="slide"] .slides .slide:not(:first-child) {
-	margin-left: -3px;
+	margin-left: -4px; /* Prvent image gap */
 }
 
 .carousel[animating] .slides {
