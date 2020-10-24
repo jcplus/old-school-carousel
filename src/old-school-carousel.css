@@ -1,0 +1,44 @@
+.carousel {
+	overflow: hidden;
+}
+
+.carousel .slides {
+	user-select: none;
+}
+
+.carousel .slides .slide {
+	margin: 0;
+	padding: 0;
+}
+
+.carousel .slides .slide img {
+	pointer-events: none; /* Prevent dragging */
+}
+
+.carousel[animation="fadein"] .slides,
+.carousel[animation="fadeout"] .slides {
+	position: relative;
+}
+
+.carousel[animation="fadein"] .slides .slide,
+.carousel[animation="fadeout"] .slides .slide {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+}
+
+.carousel[animation="slide"] .slides {
+	transform: translateX(0);
+	white-space: nowrap;
+}
+
+.carousel[animation="slide"] .slides .slide {
+	cursor: grab;
+	display: inline-block;
+}
+
+.carousel[animation="slide"] .slides .slide:not(:first-child) {
+	margin-left: -3px;
+}
