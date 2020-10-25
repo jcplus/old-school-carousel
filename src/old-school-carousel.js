@@ -3,6 +3,7 @@ function Carousel (param) {
 	if (typeof param === 'undefined') throw 'First parameter is required';
 
 	// Default settings
+	this.active = 0;
 	this.container = null;
 	this.direction = '|';
 	this.dragging = false;
@@ -25,9 +26,17 @@ function Carousel (param) {
 	this.init();
 }
 
-Carousel.prototype.compensateSlides = function (i, position) {
-	var clone = this.slides[i].cloneNode(true);
-	this.slideWrapper.insertAdjacentElement(position, clone);
+Carousel.prototype.calculatePosition = function () {
+	var offset = 0, container = this.container.getBoundingClientRect();
+	for (var i = 0; i < this.slides.length; i ++) {
+		if (this.slides[i].getAttribute('index') == this.active) {
+			offset = i - 1;
+			break;
+		}
+	}
+	this.slideWrapper.style.transform = 'translateX(' + (offset * container.width) + 'px)';
+	this.slideWrapper.style.WebkitTransform = 'translateX(' + (offset * container.width) + 'px)';
+	console.log(offset * container.width);
 };
 
 Carousel.prototype.determineSpeed = function (offset) {
@@ -37,7 +46,7 @@ Carousel.prototype.determineSpeed = function (offset) {
 };
 
 Carousel.prototype.init = function () {
-	var _this = this, slides = [];
+	var _this = this, clones = [], slides = [];
 	this.container.classList.add('carousel');
 	this.slideWrapper = this.container.querySelector('.slides');
 
@@ -54,17 +63,18 @@ Carousel.prototype.init = function () {
 	if (!this.container.hasAttribute('animation')) this.container.setAttribute('animation', this.settings.animation);
 
 	// Convert NodeList to Array
-	Array.prototype.forEach.call(this.slideWrapper.querySelectorAll('.slide'), function (slide) {
+	Array.prototype.forEach.call(this.slideWrapper.querySelectorAll('.slide'), function (slide, i) {
 		slide.style.width = _this.width + 'px';
+		slide.setAttribute('index', i);
+		if (slide.getAttribute('active') !== null) _this.active = i;
 		slides.push(slide);
+		clones.push(slide.cloneNode(true));
 	});
 	this.slides = slides;
-	// this.firstSlide = slides[0];
-	// this.lastSlide = slides[slides.length - 1];
+	this.cloneSlides = clones;
 
 	if (this.settings.animation === 'slide') {
-		// this.compensateSlides(0, 'afterbegin');
-		// this.compensateSlides(slides.length - 1, 'beforeend');
+		// this.insertBefore(clones[clones.length - 1], 0).calculatePosition();
 
 		this.container.addEventListener('mousedown', function (e) {
 			_this.container.removeAttribute('animating');
@@ -75,32 +85,50 @@ Carousel.prototype.init = function () {
 
 		window.addEventListener('mouseup', function () {
 			_this.dragging = false; // Exit dragging mode
+			_this.rearranged = false;
 			document.removeEventListener('mousemove', mousemoveFunc, false);
 			_this.snapPosition();
 		});
 	}
 };
 
+Carousel.prototype.insertBefore = function (element, i) {
+	var slide = this.slides[i],
+		index = parseInt(slide.getAttribute('index'));
+	element.setAttribute('index', index - 1);
+	slide.insertAdjacentElement('beforebegin', element);
+	return this;
+};
+
 Carousel.prototype.mostDisplaySlide = function () {
-	var container = this.container.getBoundingClientRect(),
+	var active = null,
+		container = this.container.getBoundingClientRect(),
 		wrapper = this.slideWrapper.getBoundingClientRect(),
 		offset = (wrapper.left - container.left) / container.width;
 	// console.log(offset, 0.2 - Math.abs(offset), Math.floor(0.2 - offset));
+	for (var i = 0; i < this.slides.length; i ++) {
+		var slide = this.slides[i].getBoundingClientRect();
+		if (slide.left - container.left) {}
+	}
 	return Math.floor(0.5 - offset);
 };
 
 Carousel.prototype.movemove = function (e) {
 	if (!this.dragging) return;
-	var transform = getComputedStyle(this.slideWrapper).getPropertyValue('transform'),
+	var container = this.container.getBoundingClientRect(),
+		transform = getComputedStyle(this.slideWrapper).getPropertyValue('transform'),
 		matrix = transform.replace(/[^0-9\-.,]/g, '').split(','),
 		transform_x = parseFloat((matrix.length > 6) ? matrix[12] : matrix[4]),
-		offset = e.clientX - this.posX;
+		offset = e.clientX - this.posX,
+		slide = null,
+		direction = offset > 0 ? '>' : '<';
+	this.posX += offset;
+
+	// console.log(offset);
 	// console.log('speed id %s and direction is %s', this.speed, this.direction);
 
 	this.slideWrapper.style.transform = 'translateX(' + (transform_x + offset) + 'px)';
 	this.slideWrapper.style.WebkitTransform = 'translateX(' + (transform_x + offset) + 'px)';
-	this.posX += offset;
-	this.mostDisplaySlide();
 	this.determineSpeed(offset);
 };
 
@@ -109,7 +137,7 @@ Carousel.prototype.snapPosition = function () {
 	console.log(this.speed);
 
 	// Fast
-	if (Math.abs(this.speed) >= 20) {
+	if (Math.abs(this.speed) >= 5) {
 		if (this.speed > 0) {
 			target --;
 		} else {

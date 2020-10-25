@@ -44,9 +44,9 @@
 }
 
 .carousel[animation="slide"] .slides .slide:not(:first-child) {
-	margin-left: -4px; /* Prvent image gap */
+	/* margin-left: -4px; /* Prvent image gap */ */
 }
 
 .carousel[animating] .slides {
-	transition: transform .2s ease-in;
+	transition: transform .1s ease-in;
 }
