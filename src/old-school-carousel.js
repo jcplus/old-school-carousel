@@ -194,10 +194,10 @@ Carousel.prototype.init = function () {
 			});
 
 			// Add extra clone slides for infinite slide effect
-			this.insertBefore(this.slides[this.slides.length - 2], 0);
-			this.insertBefore(this.slides[this.slides.length - 1], 0);
-			this.insertAfter(this.slides[1], this.slides.length - 1);
-			this.insertAfter(this.slides[0], this.slides.length - 1);
+			this.insert('before', this.slides[this.slides.length - 2], 0);
+			this.insert('before', this.slides[this.slides.length - 1], 0);
+			this.insert('after', this.slides[1], this.slides.length - 1);
+			this.insert('after', this.slides[0], this.slides.length - 1);
 
 			this.snapPosition(this.activeSlide, true);
 			break;
@@ -205,21 +205,25 @@ Carousel.prototype.init = function () {
 	return this;
 };
 
-Carousel.prototype.insertAfter = function (element, i) {
+Carousel.prototype.insert = function (position, element, i) {
 	var clone = element.cloneNode(true),
 		slide = this.slides[i];
-	clone.setAttribute('clone', '');
-	clone.setAttribute('index', element.getAttribute('index'));
-	slide.insertAdjacentElement('afterend', clone);
-	return this;
-};
 
-Carousel.prototype.insertBefore = function (element, i) {
-	var clone = element.cloneNode(true),
-		slide = this.slides[i];
+	switch (position) {
+		case 'after':
+			position = 'afterend';
+			break;
+		case 'before':
+			position = 'beforebegin';
+			break;
+		default:
+			throw 'Position "' + position + '" not supported';
+			break;
+	}
+
 	clone.setAttribute('clone', '');
 	clone.setAttribute('index', element.getAttribute('index'));
-	slide.insertAdjacentElement('beforebegin', clone);
+	slide.insertAdjacentElement(position, clone);
 	return this;
 };
 
