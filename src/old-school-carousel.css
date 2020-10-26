@@ -12,13 +12,14 @@
 }
 
 .carousel .slides .slide > img {
+	border: 0;
 	display: block;
 	height: auto;
 	margin: 0;
 	pointer-events: none; /* Prevent dragging */
 	width: 100%;
 }
-
+/*
 .carousel[animation="fadein"] .slides,
 .carousel[animation="fadeout"] .slides {
 	position: relative;
@@ -31,7 +32,7 @@
 	left: 0;
 	height: 100%;
 	width: 100%;
-}
+} */
 
 .carousel[animation="slide"] .slides {
 	transform: translateX(0);
@@ -41,10 +42,6 @@
 .carousel[animation="slide"] .slides .slide {
 	cursor: grab;
 	display: inline-block;
-}
-
-.carousel[animation="slide"] .slides .slide:not(:first-child) {
-	/* margin-left: -4px; /* Prvent image gap */ */
 }
 
 .carousel[animating] .slides {
